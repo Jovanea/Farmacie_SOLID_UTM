@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36511.14 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farmacie_SOLID_UTM", "Farmacie_SOLID_UTM\Farmacie_SOLID_UTM.csproj", "{18719DB7-9D43-4A81-AD85-F239EF90163C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{18719DB7-9D43-4A81-AD85-F239EF90163C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18719DB7-9D43-4A81-AD85-F239EF90163C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18719DB7-9D43-4A81-AD85-F239EF90163C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18719DB7-9D43-4A81-AD85-F239EF90163C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A4E2F81-E2D0-49B8-AEDD-1E51994F8771}
+	EndGlobalSection
+EndGlobal
