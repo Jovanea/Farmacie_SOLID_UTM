@@ -18,7 +18,8 @@ namespace Farmacie_SOLID_UTM
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            // Creez manual serviciul de stocare (respectând DIP)
+            // DIP: Aici în "Composition Root" decidem ce implementare concretă să folosim.
+            // Putem schimba ConsolaStorage cu orice altă clasă care implementează IStocare fără a afecta restul aplicației.
             // Mai târziu aici pot pune SQLStorage în loc de ConsolaStorage
             IStocare serviciuStocare = new ConsolaStorage();
 

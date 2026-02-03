@@ -8,12 +8,12 @@ using Farmacie_SOLID_UTM.Models;
 
 namespace Farmacie_SOLID_UTM.Services
 {
-    // SRP: Această clasă are o singură responsabilitate - "salvarea" (afișarea) datelor
+    // SRP(Single Responsibility Principle): Această clasă are o singură responsabilitate - "salvarea" (afișarea) datelor
     public class ConsolaStorage : IStocare
     {
         public void Salveaza(Produs p)
         {
-            // Simulează o salvare. La laboratorul următor, aici va fi codul de SQL.
+            // Simulează o salvare.
             Console.WriteLine($"[LOG]: Produsul {p.Nume} a fost procesat.");
         }
     }

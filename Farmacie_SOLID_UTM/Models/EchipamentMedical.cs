@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Farmacie_SOLID_UTM.Models
 {
-    // Moștenire: EchipamentMedical este tot un Produs (LSP)
+    // Moștenire: EchipamentMedical este tot un Produs
+    // LSP (Liskov Substitution Principle): Obiectele de tip EchipamentMedical pot înlocui obiectele de tip Produs fără erori.
     public class EchipamentMedical : Produs
     {
         public string TipEchipament { get; private set; }

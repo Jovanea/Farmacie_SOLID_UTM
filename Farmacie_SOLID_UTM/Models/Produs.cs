@@ -9,6 +9,7 @@ namespace Farmacie_SOLID_UTM.Models
     public abstract class Produs
     {
         // Încapsulare: Proprietăți protejate (set) și publice (get)
+        // OCP (Open/Closed Principle): Clasa este deschisă pentru extindere (prin moștenire), dar închisă pentru modificare.
         public string Nume { get; protected set; }
         public decimal Pret { get; protected set; }
 

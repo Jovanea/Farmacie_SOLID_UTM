@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Farmacie_SOLID_UTM.Models
 {
-    // Moștenire (Inheritance)
+    // Moștenire (Inheritance): Medicament extinde funcționalitatea clasei de bază Produs
+    // LSP (Liskov Substitution Principle): Această clasă poate fi folosită oriunde este așteptat un 'Produs'
     public class Medicament : Produs
     {
         public string Producator { get; private set; }
@@ -17,6 +18,7 @@ namespace Farmacie_SOLID_UTM.Models
             Producator = producator;
         }
 
+        // Polimorfism: Implementăm comportamentul specific pentru Medicament
         public override string ObtineDetalii()
         {
             return $"{Nume} ({Producator}) - {Pret} MDL";
