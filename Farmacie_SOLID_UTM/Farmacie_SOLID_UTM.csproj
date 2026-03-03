@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,9 +57,27 @@
     <Compile Include="Models\EchipamentMedical.cs" />
     <Compile Include="Models\Medicament.cs" />
     <Compile Include="Models\Produs.cs" />
+    <Compile Include="Models\MedicamentDurere.cs" />
+    <Compile Include="Models\Bandaj.cs" />
+    <Compile Include="Models\ParacetamolForte.cs" />
+    <Compile Include="Models\SiropDurere.cs" />
+    <Compile Include="Models\BandajElastic.cs" />
+    <Compile Include="Models\PlastureColorat.cs" />
+    <Compile Include="Factories\ITrusaFactory.cs" />
+    <Compile Include="Factories\TrusaAdultiFactory.cs" />
+    <Compile Include="Factories\TrusaCopiiFactory.cs" />
+    <Compile Include="Factories\ProdusFactory.cs" />
+    <Compile Include="Factories\MedicamentFactory.cs" />
+    <Compile Include="Factories\EchipamentFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ConsolaStorage.cs" />
+    <Compile Include="Services\StocManager.cs" />
+    <Compile Include="Builders\TrusaBuilder.cs" />
+    <Compile Include="Builders\TrusaDirector.cs" />
+    <Compile Include="Interfaces\IPrototip.cs" />
+    <Compile Include="Models\TrusaMedicala.cs" />
+    <Compile Include="Tests\UnitTests.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

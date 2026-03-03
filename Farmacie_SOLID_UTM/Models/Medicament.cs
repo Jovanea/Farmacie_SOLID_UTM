@@ -23,5 +23,12 @@ namespace Farmacie_SOLID_UTM.Models
         {
             return $"{Nume} ({Producator}) - {Pret} MDL";
         }
+
+        // Prototype Pattern: Returnăm o copie a obiectului curent
+        public override Produs Cloneaza()
+        {
+            // Shallow Copy este suficient aici deoarece string-urile sunt imutabile
+            return (Produs)this.MemberwiseClone();
+        }
     }
 }

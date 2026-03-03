@@ -18,5 +18,11 @@ namespace Farmacie_SOLID_UTM.Models
         }
 
         public override string ObtineDetalii() => $"{Nume} (Echipament: {TipEchipament}) - {Pret} MDL";
+
+        // Prototype Pattern: Returnăm o copie a obiectului curent
+        public override Produs Cloneaza()
+        {
+            return (Produs)this.MemberwiseClone();
+        }
     }
 }

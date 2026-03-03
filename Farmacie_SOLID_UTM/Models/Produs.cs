@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Farmacie_SOLID_UTM.Models
 {
-    public abstract class Produs
+    public abstract class Produs : Farmacie_SOLID_UTM.Interfaces.IPrototip
     {
         // Încapsulare: Proprietăți protejate (set) și publice (get)
         // OCP (Open/Closed Principle): Clasa este deschisă pentru extindere (prin moștenire), dar închisă pentru modificare.
@@ -21,5 +21,8 @@ namespace Farmacie_SOLID_UTM.Models
 
         // Polimorfism: Metodă ce va fi implementată diferit de subclase
         public abstract string ObtineDetalii();
+
+        // Prototype Pattern: Metoda abstractă de clonare
+        public abstract Produs Cloneaza();
     }
 }
