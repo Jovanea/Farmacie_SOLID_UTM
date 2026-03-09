@@ -78,6 +78,12 @@
     <Compile Include="Interfaces\IPrototip.cs" />
     <Compile Include="Models\TrusaMedicala.cs" />
     <Compile Include="Tests\UnitTests.cs" />
+    <Compile Include="Models\FurnizorExternProdus.cs" />
+    <Compile Include="Models\ProdusAdapter.cs" />
+    <Compile Include="Models\PachetProduse.cs" />
+    <Compile Include="Services\SistemPlata.cs" />
+    <Compile Include="Services\SistemFacturare.cs" />
+    <Compile Include="Services\FarmacieFacade.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

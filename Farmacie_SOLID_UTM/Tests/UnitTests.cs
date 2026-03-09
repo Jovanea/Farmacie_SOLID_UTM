@@ -24,6 +24,9 @@ namespace Farmacie_SOLID_UTM.Tests
                 TestSingleton();
                 TestBuilder();
                 TestPrototype();
+                TestAdapter();
+                TestComposite();
+                TestFacade();
 
                 MessageBox.Show("Toate testele au trecut cu succes!", "Testare Unitara");
             }
@@ -88,6 +91,45 @@ namespace Farmacie_SOLID_UTM.Tests
                 throw new Exception("Prototype Failed: Clona este acelasi obiect cu originalul (referinta identica)!");
 
             Console.WriteLine("Test Prototype: PASSED");
+        }
+
+        private static void TestAdapter()
+        {
+            var furnizorExtern = new FurnizorExternProdus();
+            Produs adapter = new ProdusAdapter(furnizorExtern);
+
+            if (adapter.Nume != "Produs Extern (Importat)")
+                throw new Exception("Adapter Failed: Numele nu s-a preluat corect!");
+
+            if (adapter.Pret != 45.50m)
+                throw new Exception("Adapter Failed: Pretul nu s-a preluat corect!");
+
+            Console.WriteLine("Test Adapter: PASSED");
+        }
+
+        private static void TestComposite()
+        {
+            var pachet = new PachetProduse("Pachet Test");
+            pachet.AdaugaInPachet(new Medicament("Nurofen", 20, "Reckitt"));
+            pachet.AdaugaInPachet(new BandajElastic("Fasa", 10, "Bumbac"));
+
+            if (pachet.Pret != 30) // 20 + 10
+                throw new Exception("Composite Failed: Pretul total al pachetului calculat incorect!");
+
+            Console.WriteLine("Test Composite: PASSED");
+        }
+
+        private static void TestFacade()
+        {
+            var facade = new FarmacieFacade();
+            var produsTest = new Medicament("Medicament Facade Test", 50, "TestCorp");
+            
+            string mesaj = facade.VindeProdusCatreClient(produsTest);
+
+            if (!mesaj.Contains("Succes"))
+                throw new Exception("Facade Failed: Procesul de vanzare a esuat!");
+
+            Console.WriteLine("Test Facade: PASSED");
         }
     }
 }
