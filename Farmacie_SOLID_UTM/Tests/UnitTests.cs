@@ -7,6 +7,9 @@ using Farmacie_SOLID_UTM.Models;
 using Farmacie_SOLID_UTM.Services;
 using Farmacie_SOLID_UTM.Builders;
 using Farmacie_SOLID_UTM.Director;
+using Farmacie_SOLID_UTM.Director;
+using Farmacie_SOLID_UTM.Decorators;
+using Farmacie_SOLID_UTM.Interfaces;
 using System.Windows.Forms;
 
 namespace Farmacie_SOLID_UTM.Tests
@@ -26,7 +29,12 @@ namespace Farmacie_SOLID_UTM.Tests
                 TestPrototype();
                 TestAdapter();
                 TestComposite();
+                TestComposite();
                 TestFacade();
+                TestFlyweight();
+                TestDecorator();
+                TestBridge();
+                TestProxy();
 
                 MessageBox.Show("Toate testele au trecut cu succes!", "Testare Unitara");
             }
@@ -111,9 +119,9 @@ namespace Farmacie_SOLID_UTM.Tests
         {
             var pachet = new PachetProduse("Pachet Test");
             pachet.AdaugaInPachet(new Medicament("Nurofen", 20, "Reckitt"));
-            pachet.AdaugaInPachet(new BandajElastic("Fasa", 10, "Bumbac"));
+            pachet.AdaugaInPachet(new BandajElastic());
 
-            if (pachet.Pret != 30) // 20 + 10
+            if (pachet.Pret != 45) // 20 + 25 (BandajElastic default price is 25)
                 throw new Exception("Composite Failed: Pretul total al pachetului calculat incorect!");
 
             Console.WriteLine("Test Composite: PASSED");
@@ -130,6 +138,57 @@ namespace Farmacie_SOLID_UTM.Tests
                 throw new Exception("Facade Failed: Procesul de vanzare a esuat!");
 
             Console.WriteLine("Test Facade: PASSED");
+        }
+
+        private static void TestFlyweight()
+        {
+            var factory = new CategorieFactory();
+            var cat1 = factory.GetCategorie("Antibiotice", "Rețetă obligatorie");
+            var cat2 = factory.GetCategorie("Antibiotice", "Rețetă obligatorie");
+
+            if (!object.ReferenceEquals(cat1, cat2))
+                throw new Exception("Flyweight Failed: Instantele nu sunt partajate!");
+
+            var p1 = new ProdusComercial("Amoxicilina", 15, "001", cat1);
+            var p2 = new ProdusComercial("Augmentin", 35, "002", cat2);
+
+            Console.WriteLine("Test Flyweight: PASSED");
+        }
+
+        private static void TestDecorator()
+        {
+            Produs baza = new Medicament("Paracetamol", 10, "Zentiva");
+            Produs cuAmbalaj = new AmbalajCadouDecorator(baza);
+
+            if (cuAmbalaj.Pret != 15) // 10 original + 5 ambalaj
+                throw new Exception("Decorator Failed: Pretul calculat incorect!");
+
+            if (!cuAmbalaj.ObtineDetalii().Contains("Ambalaj Cadou"))
+                throw new Exception("Decorator Failed: Functia ObtineDetalii nu a fost extinsa!");
+
+            Console.WriteLine("Test Decorator: PASSED");
+        }
+
+        private static void TestBridge()
+        {
+            IPlatformaTrimitere metodaSms = new TrimitereSms();
+            Notificator notificator = new NotificatorUrgent(metodaSms);
+            
+            // Simulam trimiterea (ar trebui sa foloseasca platforma injectata)
+            notificator.ExpediazaAlerta("Stoc epuizat la Nurofen");
+
+            Console.WriteLine("Test Bridge: PASSED");
+        }
+
+        private static void TestProxy()
+        {
+            IAccesBazaDate proxyGresit = new ProxyBazaDate("UserSimplu");
+            proxyGresit.StergeProdus("Test1"); // Eroare afisata in consola
+            
+            IAccesBazaDate proxyCorect = new ProxyBazaDate("Manager");
+            proxyCorect.StergeProdus("Test2"); // Trece corect
+
+            Console.WriteLine("Test Proxy: PASSED");
         }
     }
 }

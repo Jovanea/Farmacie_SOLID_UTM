@@ -84,6 +84,19 @@
     <Compile Include="Services\SistemPlata.cs" />
     <Compile Include="Services\SistemFacturare.cs" />
     <Compile Include="Services\FarmacieFacade.cs" />
+    <Compile Include="Models\CategorieFlyweight.cs" />
+    <Compile Include="Models\CategorieFactory.cs" />
+    <Compile Include="Models\ProdusComercial.cs" />
+    <Compile Include="Decorators\ProdusDecorator.cs" />
+    <Compile Include="Decorators\AmbalajCadouDecorator.cs" />
+    <Compile Include="Interfaces\IPlatformaTrimitere.cs" />
+    <Compile Include="Services\TrimitereEmail.cs" />
+    <Compile Include="Services\TrimitereSms.cs" />
+    <Compile Include="Services\Notificator.cs" />
+    <Compile Include="Services\NotificatorUrgent.cs" />
+    <Compile Include="Interfaces\IAccesBazaDate.cs" />
+    <Compile Include="Services\RealBazaDate.cs" />
+    <Compile Include="Services\ProxyBazaDate.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
