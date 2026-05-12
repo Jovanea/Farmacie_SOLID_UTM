@@ -4,8 +4,8 @@ namespace Farmacie_SOLID_UTM.Mementos
 {
     // Se definesc pe acelasi fisier pt simplitate de legatura academica
     
-    // Originator
-    public class CosOriginator
+    // Originator 
+    public class CosOriginator                                                ///
     {
         // - state
         private List<string> _state = new List<string>();
@@ -36,11 +36,11 @@ namespace Farmacie_SOLID_UTM.Mementos
         }
 
         // Memento Interface (Ascunde starea)
-        public interface IMemento { }
+        public interface IMemento { }                                          ///
 
         // Memento
         // Conform imaginii "Implementation based on nested classes"
-        private class CosMemento : IMemento
+        private class CosMemento : IMemento                                    ///
         {
             // - state
             private List<string> _state;
@@ -60,7 +60,7 @@ namespace Farmacie_SOLID_UTM.Mementos
     }
 
     // Caretaker
-    public class IstoricCosCaretaker
+    public class IstoricCosCaretaker                                                      ///
     {
         // - originator
         private CosOriginator _originator;

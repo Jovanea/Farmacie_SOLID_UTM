@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Farmacie_SOLID_UTM.Iterators
 {
     // ConcreteCollection
-    public class DulapMedicamente : IIterableCollection
+    public class DulapMedicamente : IIterableCollection                   ////
     {
         private List<string> _medicamente = new List<string>();
 
@@ -25,7 +25,7 @@ namespace Farmacie_SOLID_UTM.Iterators
     }
 
     // ConcreteIterator
-    public class IteratorDulap : IIterator
+    public class IteratorDulap : IIterator                             ///
     {
         // - collection: ConcreteCollection
         private DulapMedicamente _collection;

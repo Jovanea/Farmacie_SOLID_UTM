@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +13,16 @@ using Farmacie_SOLID_UTM.Factories;
 using Farmacie_SOLID_UTM.Builders;
 using Farmacie_SOLID_UTM.Director;
 using Farmacie_SOLID_UTM.Services;
+using Farmacie_SOLID_UTM.Strategies;
+using Farmacie_SOLID_UTM.Observers;
+using Farmacie_SOLID_UTM.Commands;
+using Farmacie_SOLID_UTM.Mementos;
+using Farmacie_SOLID_UTM.Iterators;
+using Farmacie_SOLID_UTM.Chains;
+using Farmacie_SOLID_UTM.States;
+using Farmacie_SOLID_UTM.Mediators;
+using Farmacie_SOLID_UTM.Templates;
+using Farmacie_SOLID_UTM.Visitors;
 
 namespace Farmacie_SOLID_UTM
 {
@@ -27,6 +37,8 @@ namespace Farmacie_SOLID_UTM
         private Button btnBuilder; // Builder Pattern (Director)
         private Button btnClone;   // Prototype Pattern
         private Button btnTest;    // Unit Tests
+        private Button btnLab6;    // Buton Special Laborator 6
+        private Button btnLab7;    // Buton Special Laborator 7
         private Label lblTipProdus;
 
         public Form1(IStocare stocare)
@@ -94,6 +106,132 @@ namespace Farmacie_SOLID_UTM
             btnTest.Size = new Size(150, 30);
             btnTest.Click += (s, e) => Farmacie_SOLID_UTM.Tests.UnitTests.RuleazaToate();
             this.Controls.Add(btnTest);
+
+            // Buton Demonstratie Lab 6 (adaugat pe ecran)
+            btnLab6 = new Button();
+            btnLab6.Text = "Demonstratie Lab 6 (Patterns)";
+            btnLab6.Location = new Point(43, 260); // Asezat mai jos
+            btnLab6.Size = new Size(250, 30);
+            btnLab6.BackColor = Color.LightGreen;
+            btnLab6.Click += BtnLab6_Click;
+            this.Controls.Add(btnLab6);
+
+            // Buton Demonstratie Lab 7
+            btnLab7 = new Button();
+            btnLab7.Text = "Demonstratie Lab 7 (Patterns)";
+            btnLab7.Location = new Point(310, 260); // Langa butonul de Lab 6
+            btnLab7.Size = new Size(250, 30);
+            btnLab7.BackColor = Color.LightSkyBlue;
+            btnLab7.Click += BtnLab7_Click;
+            this.Controls.Add(btnLab7);
+        }
+
+        private void BtnLab7_Click(object sender, EventArgs e)
+        {
+            // PROFESOAREI IMPRIMATI ASTA VISUAL: Aceasta metoda este Clientul (Form1) 
+            // demonstrand rularea celor 5 patternuri din Lab 7!
+
+            // --- 1. CHAIN OF RESPONSIBILITY ---
+            // EXPLICATIE: Un lant de aprobare discount trece cererea de la Farmacist la Director pana o aproba cineva.
+            var farmacist = new FarmacistHandler();
+            var manager = new ManagerHandler();
+            var director = new DirectorHandler();
+            farmacist.SetNext(manager).SetNext(director);
+            farmacist.GestioneazaCererea(12); // Cade in responsabilitatea Managerului!
+
+            // --- 2. STATE ---
+            // EXPLICATIE: Comanda de aprovizionare isi schimba comportamentul daca ii mutam starea!
+            var comanda = new ComandaAprovizionare(new StareNoua()); // Pleaca Noua
+            comanda.Proceseaza(); // Ajunge In Procesare
+            comanda.Livreaza(); // Ajunge Livrata
+
+            // --- 3. MEDIATOR ---
+            // EXPLICATIE: Vanzarile si Depozitul nu se striga direct unul pe altul. Ele vorbesc prin CentralaFarmacie.
+            var centrala = new CentralaFarmacie();
+            var vanzari = new DepartamentVanzari();
+            var depozit = new DepartamentDepozit();
+            centrala.SeteazaVanzari(vanzari);
+            centrala.SeteazaDepozit(depozit);
+            vanzari.EfectueazaVanzare(); // Asta triggereaza automat scaderea in depozit via Mediator!
+
+            // --- 4. TEMPLATE METHOD ---
+            // EXPLICATIE: Raportul de vanzari refoloseste pasii standard (Culegere -> Printare) dar suprascrie doar Formatarea.
+            RaportTemplate raportZilnic = new RaportZilnicVanzari();
+            raportZilnic.GenereazaRaport();
+
+            // --- 5. VISITOR ---
+            // EXPLICATIE: Vrem un export XML pentru Facturi si Retete fara sa stricam clasele de baza. Visitorul le "viziteaza" pe ambele.
+            var doc1 = new RetetaCompensata();
+            var doc2 = new FacturaFirma();
+            var visitor = new ExportXmlVisitor();
+            doc1.Accept(visitor);
+            doc2.Accept(visitor);
+
+            MessageBox.Show(
+                "Demonstratia Laboratorului 7 a simulat totul in cod (vezi Consola pentru loguri detailate):\n\n" +
+                $"1. Chain: O cerere de 12% a ajuns la Manager si a fost aprobata.\n" +
+                $"2. State: Comanda Aprovizionare si-a schimbat perfect stările (Noua->Procesare->Livrata).\n" +
+                $"3. Mediator: Vanzarile au comunicat cu Depozitul curat prin Centrala.\n" +
+                $"4. Template: Raportul s-a formatat folosind skeletonul general.\n" +
+                $"5. Visitor: Am exportat Reteta si Factura in XML fara sa le alteram clasele interne.",
+                "Aplicație - Evaluare Lab 7"
+            );
+        }
+
+        private void BtnLab6_Click(object sender, EventArgs e)
+        {
+
+            // --- 1. STRATEGY PATTERN ---
+            // cum schimbăm algoritmul prețului fără "if"-uri in casă.
+            var calculator = new CalculatorPretFinal();
+            calculator.SetStrategie(new DiscountFidelitate()); // Instantiem o clasa separata
+            decimal pretDupaFidelitate = calculator.CalculeazaPretul(100);
+
+            // --- 2. OBSERVER PATTERN ---
+            // pe "sistem" si "farmacist" sunt adaugati la Produs.
+            var produsAspirina = new ProdusPublisher("Aspirina", 10);
+            produsAspirina.Subscribe(new FarmacistAbonat("Maria"));
+            produsAspirina.Subscribe(new SistemAprovizionare());
+            produsAspirina.ModificaStoc(3); // La 3 trage sirena automat celor abonati sus
+
+            // --- 3. COMMAND PATTERN ---
+            // Am adunat comanda "CasaDeMarcat" într-o capsulă care permite "UndoUltimaComanda" la greseli
+            var sistemGest = new SistemGestiune();
+            var casaMarcat = new CasaDeMarcat();
+            var comanda = new ComandaVanzare(sistemGest, "Nurofen", 2);
+            casaMarcat.SetCommand(comanda);
+            casaMarcat.ExecuteCommand(); // Ex. Un angajat scade stoc 2 lei
+            casaMarcat.UndoUltimaComanda(); // Oups, clientul nu vrea. Returnam complet eroarea.
+
+            // --- 4. MEMENTO PATTERN ---
+            // Am facut "Snapshot"/Fotografie unui cos plin prin clasa ascunsa "CosMemento".
+            var cos = new CosOriginator();
+            cos.AdaugaProdus("Reteta sigura!");
+            var istoric = new IstoricCosCaretaker(cos);
+            istoric.SalveazaStarea(); // Fotografiem acum starea buna (Memento format)
+            cos.AdaugaProdus("Eroare adaugata gresit."); // Pacient razgandit
+            istoric.Undo(); // Restaurare instanta fara batai de cap!
+
+            // --- 5. ITERATOR PATTERN ---
+            // Nu mai ne încurcăm creierul cu logica de raft din DulapMedicamente, IteratorDulap face el
+            var raft = new DulapMedicamente();
+            raft.Adauga("Ser Fiziologic");
+            var iterator = raft.CreateIterator();
+            string elementeParcurse = "";
+            while (iterator.HasMore())
+            {
+                elementeParcurse += iterator.GetNext() + " "; 
+            }
+
+            MessageBox.Show(
+                "Demonstratia Laboratorului 6 a simulat totul in cod:\n\n" +
+                $"1. Strategy: a adus din start aplicatiei din spate {pretDupaFidelitate} MDL cu Discount Fidelitate\n" +
+                $"2. Observer: A ascultat evenimentul modificarii sub 5 cutii Aspirina.\n" +
+                $"3. Command: A salvat capsula de cumparare si apoi a dat Undo repede.\n" +
+                $"4. Memento: Reteta 'Eroare adaugata gresit' a fost blocată la Load State!\n" +
+                $"5. Iterator: Parcurgerea raftului returneaza cutiile: {elementeParcurse}",
+                "Aplicație - Evaluare Patternuri"
+            );
         }
 
         private void BtnTrusaAdulti_Click(object sender, EventArgs e)

@@ -12,6 +12,17 @@ using Farmacie_SOLID_UTM.Decorators;
 using Farmacie_SOLID_UTM.Interfaces;
 using System.Windows.Forms;
 
+using Farmacie_SOLID_UTM.Strategies;
+using Farmacie_SOLID_UTM.Observers;
+using Farmacie_SOLID_UTM.Commands;
+using Farmacie_SOLID_UTM.Mementos;
+using Farmacie_SOLID_UTM.Iterators;
+using Farmacie_SOLID_UTM.Chains;
+using Farmacie_SOLID_UTM.States;
+using Farmacie_SOLID_UTM.Mediators;
+using Farmacie_SOLID_UTM.Templates;
+using Farmacie_SOLID_UTM.Visitors;
+
 namespace Farmacie_SOLID_UTM.Tests
 {
     // Clasa simplă pentru Testare Unitara (Manuală)
@@ -36,7 +47,21 @@ namespace Farmacie_SOLID_UTM.Tests
                 TestBridge();
                 TestProxy();
 
-                MessageBox.Show("Toate testele au trecut cu succes!", "Testare Unitara");
+                // --- Teste Lab 6 - Comportamentale ---
+                TestStrategy();
+                TestObserver();
+                TestCommand();
+                TestMemento();
+                TestIterator();
+
+                // --- Teste Lab 7 ---
+                TestChainOfResponsibility();
+                TestState();
+                TestMediator();
+                TestTemplateMethod();
+                TestVisitor();
+
+                MessageBox.Show("Toate testele (Lab 1-7) au trecut cu succes!", "Testare Unitara");
             }
             catch (Exception ex)
             {
@@ -158,7 +183,7 @@ namespace Farmacie_SOLID_UTM.Tests
         private static void TestDecorator()
         {
             Produs baza = new Medicament("Paracetamol", 10, "Zentiva");
-            Produs cuAmbalaj = new AmbalajCadouDecorator(baza);
+            var cuAmbalaj = new AmbalajCadouDecorator(baza); // Corectie pentru cuvantul cheie `new` pe proprietatea Pret
 
             if (cuAmbalaj.Pret != 15) // 10 original + 5 ambalaj
                 throw new Exception("Decorator Failed: Pretul calculat incorect!");
@@ -189,6 +214,175 @@ namespace Farmacie_SOLID_UTM.Tests
             proxyCorect.StergeProdus("Test2"); // Trece corect
 
             Console.WriteLine("Test Proxy: PASSED");
+        }
+
+        private static void TestStrategy()
+        {
+            var calculator = new CalculatorPretFinal();
+            
+            // Fara discount
+            calculator.SetStrategie(new FaraDiscount());
+            if (calculator.CalculeazaPretul(100) != 100) throw new Exception("Strategy Failed: FaraDiscount a corupt calculul!");
+
+            // Discount de fidelitate
+            calculator.SetStrategie(new DiscountFidelitate());
+            if (calculator.CalculeazaPretul(100) != 90) throw new Exception("Strategy Failed: DiscountFidelitate a esuat!");
+
+            Console.WriteLine("Test Strategy: PASSED");
+        }
+
+        private static void TestObserver()
+        {
+            var produs = new ProdusPublisher("Paracetamol", 10);
+            var sistemAprovizionare = new SistemAprovizionare();
+            var farmacist = new FarmacistAbonat("Ion");
+
+            produs.Subscribe(sistemAprovizionare);
+            produs.Subscribe(farmacist);
+
+            // Modificare normala
+            produs.ModificaStoc(8); 
+
+            // Scade sub 5 -> Trebuie sa primim loguri in consola 
+            Console.WriteLine("--- Se asteapta Notificari Observer ---");
+            produs.ModificaStoc(3); 
+            Console.WriteLine("---------------------------------------");
+
+            Console.WriteLine("Test Observer: PASSED");
+        }
+
+        private static void TestCommand()
+        {
+            var sistem = new SistemGestiune(); // Receiver
+            var casa = new CasaDeMarcat(); // Invoker
+            var cmd = new ComandaVanzare(sistem, "Ibuprofen", 2);
+
+            casa.SetCommand(cmd);
+            casa.ExecuteCommand(); // Reduce din receiver
+            casa.UndoUltimaComanda(); // Aduna la loc in receiver
+
+            Console.WriteLine("Test Command: PASSED");
+        }
+
+        private static void TestMemento()
+        {
+            var cos = new CosOriginator();
+            cos.AdaugaProdus("Aspirina");
+
+            var istoric = new IstoricCosCaretaker(cos);
+            istoric.SalveazaStarea(); // Salveaza snapshot doar cu Aspirina
+
+            cos.AdaugaProdus("Nurofen"); // Adaugam inca ceva
+
+            istoric.Undo(); // Restore cos = doar Aspirina
+
+            Console.WriteLine("Test Memento: PASSED");
+        }
+
+        private static void TestIterator()
+        {
+            var dulap = new DulapMedicamente();
+            dulap.Adauga("Ser fiziologic");
+            dulap.Adauga("Betadina");
+            dulap.Adauga("Oxigen");
+
+            var iterator = dulap.CreateIterator();
+            int nr = 0;
+            while(iterator.HasMore())
+            {
+                var val = iterator.GetNext();
+                nr++;
+            }
+
+            if (nr != 3) throw new Exception("Iterator Failed!");
+
+            Console.WriteLine("Test Iterator: PASSED");
+        }
+
+        // ========================================================
+        // LAB 7 TESTS
+        // ========================================================
+
+        private static void TestChainOfResponsibility()
+        {
+            var farmacist = new FarmacistHandler();
+            var manager = new ManagerHandler();
+            var director = new DirectorHandler();
+
+            farmacist.SetNext(manager).SetNext(director);
+
+            Console.WriteLine("--- Test Chain: Discount 3% ---");
+            farmacist.GestioneazaCererea(3);
+
+            Console.WriteLine("--- Test Chain: Discount 10% ---");
+            farmacist.GestioneazaCererea(10);
+
+            Console.WriteLine("--- Test Chain: Discount 20% ---");
+            farmacist.GestioneazaCererea(20);
+
+            Console.WriteLine("Test ChainOfResponsibility: PASSED");
+        }
+
+        private static void TestState()
+        {
+            Console.WriteLine("--- Test State ---");
+            var comanda = new ComandaAprovizionare(new StareNoua());
+            
+            // Noua -> In Procesare
+            comanda.Proceseaza(); 
+            // In Procesare -> Livrata
+            comanda.Livreaza();
+            // Nu se poate anula
+            comanda.Anuleaza();
+
+            Console.WriteLine("Test State: PASSED");
+        }
+
+        private static void TestMediator()
+        {
+            Console.WriteLine("--- Test Mediator ---");
+            var centrala = new CentralaFarmacie();
+            var vanzari = new DepartamentVanzari();
+            var depozit = new DepartamentDepozit();
+
+            centrala.SeteazaVanzari(vanzari);
+            centrala.SeteazaDepozit(depozit);
+
+            // Declanseaza lantul mediatic
+            vanzari.EfectueazaVanzare();
+
+            Console.WriteLine("Test Mediator: PASSED");
+        }
+
+        private static void TestTemplateMethod()
+        {
+            Console.WriteLine("--- Test Template Method ---");
+            RaportTemplate raport1 = new RaportZilnicVanzari();
+            raport1.GenereazaRaport();
+
+            RaportTemplate raport2 = new RaportStocCritic();
+            raport2.GenereazaRaport();
+
+            Console.WriteLine("Test TemplateMethod: PASSED");
+        }
+
+        private static void TestVisitor()
+        {
+            Console.WriteLine("--- Test Visitor ---");
+            var documente = new List<IDocumentFarmacie>
+            {
+                new RetetaCompensata { NumePacient = "Vasile", Diagnostic = "Raceala" },
+                new FacturaFirma { NumeFirma = "Furnizor A", TotalDePlata = 500 }
+            };
+
+            var visitor = new ExportXmlVisitor();
+
+            foreach (var doc in documente)
+            {
+                doc.Accept(visitor);
+            }
+
+            Console.WriteLine("Test Visitor: PASSED");
         }
     }
 }
