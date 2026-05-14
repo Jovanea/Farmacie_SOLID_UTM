@@ -5,7 +5,7 @@ namespace Farmacie_SOLID_UTM.Templates
     // Template Method: Definește scheletul unui algoritm, permițând subclaselor să suprascrie anumiți pași.
 
     // Clasa Abstractă (Template)
-    public abstract class RaportTemplate
+    public abstract class RaportTemplate       ////
     {
         // Aceasta este "Template Method" - nu se poate suprascrie (sau nu ar trebui)
         // Definește exact ordinea pașilor
@@ -34,7 +34,7 @@ namespace Farmacie_SOLID_UTM.Templates
     }
 
     // Implementare 1: Raport Zilnic de Vânzări
-    public class RaportZilnicVanzari : RaportTemplate
+    public class RaportZilnicVanzari : RaportTemplate         /////
     {
         protected override void FormateazaRaport()
         {
@@ -43,7 +43,7 @@ namespace Farmacie_SOLID_UTM.Templates
     }
 
     // Implementare 2: Raport Stoc Critic
-    public class RaportStocCritic : RaportTemplate
+    public class RaportStocCritic : RaportTemplate             ////
     {
         protected override void FormateazaRaport()
         {

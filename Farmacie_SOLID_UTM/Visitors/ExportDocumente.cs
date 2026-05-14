@@ -6,20 +6,20 @@ namespace Farmacie_SOLID_UTM.Visitors
     // Visitor Pattern: Separă un algoritm de structura de obiecte pe care operează.
 
     // Interfața Visitor
-    public interface IVisitorExport
+    public interface IVisitorExport                  ////
     {
         void Visit(RetetaCompensata reteta);
         void Visit(FacturaFirma factura);
     }
 
     // Interfața Element
-    public interface IDocumentFarmacie
+    public interface IDocumentFarmacie               ////
     {
         void Accept(IVisitorExport visitor);
     }
 
     // Element Concret 1
-    public class RetetaCompensata : IDocumentFarmacie
+    public class RetetaCompensata : IDocumentFarmacie      ////// ---->
     {
         public string NumePacient { get; set; } = "Ion Popescu";
         public string Diagnostic { get; set; } = "Gripa";
@@ -32,7 +32,7 @@ namespace Farmacie_SOLID_UTM.Visitors
     }
 
     // Element Concret 2
-    public class FacturaFirma : IDocumentFarmacie
+    public class FacturaFirma : IDocumentFarmacie          ////
     {
         public string NumeFirma { get; set; } = "Farmacia Centrala SRL";
         public decimal TotalDePlata { get; set; } = 15000m;
@@ -44,7 +44,7 @@ namespace Farmacie_SOLID_UTM.Visitors
     }
 
     // Concrete Visitor: Extrage datele in XML
-    public class ExportXmlVisitor : IVisitorExport
+    public class ExportXmlVisitor : IVisitorExport           ///// 
     {
         public void Visit(RetetaCompensata reteta)
         {

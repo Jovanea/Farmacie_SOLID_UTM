@@ -5,7 +5,7 @@ namespace Farmacie_SOLID_UTM.States
     // State Pattern: Un obiect își schimbă comportamentul când starea sa internă se schimbă.
 
     // Contextul (Comanda propriu-zisă)
-    public class ComandaAprovizionare
+    public class ComandaAprovizionare                     ////
     {
         private StareComanda _stareCurenta;
 
@@ -28,7 +28,7 @@ namespace Farmacie_SOLID_UTM.States
     }
 
     // Clasa abstractă de Stare (cuprinde și setarea contextului conform indicației din poză)
-    public abstract class StareComanda
+    public abstract class StareComanda                          ////
     {
         protected ComandaAprovizionare _context;
 
@@ -43,7 +43,7 @@ namespace Farmacie_SOLID_UTM.States
     }
 
     // Stare 1: Nouă
-    public class StareNoua : StareComanda
+    public class StareNoua : StareComanda              ////
     {
         public override void Proceseaza()
         {
@@ -63,7 +63,7 @@ namespace Farmacie_SOLID_UTM.States
     }
 
     // Stare 2: În Procesare
-    public class StareInProcesare : StareComanda
+    public class StareInProcesare : StareComanda                 ////
     {
         public override void Proceseaza()
         {
@@ -83,7 +83,7 @@ namespace Farmacie_SOLID_UTM.States
     }
 
     // Stare 3: Livrată
-    public class StareLivrata : StareComanda
+    public class StareLivrata : StareComanda                    ////
     {
         public override void Proceseaza()
         {

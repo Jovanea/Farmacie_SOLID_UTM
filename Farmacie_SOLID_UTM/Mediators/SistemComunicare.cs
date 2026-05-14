@@ -5,13 +5,13 @@ namespace Farmacie_SOLID_UTM.Mediators
     // Mediator Pattern: Centralizează comunicarea între obiecte, evitând cuplarea directă.
 
     // Interfața Mediator
-    public interface IMediatorFarmacie
+    public interface IMediatorFarmacie                ////
     {
         void TrimiteMesaj(ComponentaFarmacie expeditor, string eveniment);
     }
 
     // Mediatorul Concret (Turnul de Control)
-    public class CentralaFarmacie : IMediatorFarmacie
+    public class CentralaFarmacie : IMediatorFarmacie   ////
     {
         private DepartamentVanzari _vanzari;
         private DepartamentDepozit _depozit;
@@ -46,7 +46,7 @@ namespace Farmacie_SOLID_UTM.Mediators
     }
 
     // Componenta de bază
-    public abstract class ComponentaFarmacie
+    public abstract class ComponentaFarmacie             ////
     {
         protected IMediatorFarmacie _mediator;
 
@@ -57,7 +57,7 @@ namespace Farmacie_SOLID_UTM.Mediators
     }
 
     // Componenta 1: Departamentul de Vânzări
-    public class DepartamentVanzari : ComponentaFarmacie
+    public class DepartamentVanzari : ComponentaFarmacie           ////
     {
         public void EfectueazaVanzare()
         {
@@ -72,7 +72,7 @@ namespace Farmacie_SOLID_UTM.Mediators
     }
 
     // Componenta 2: Departamentul de Depozit
-    public class DepartamentDepozit : ComponentaFarmacie
+    public class DepartamentDepozit : ComponentaFarmacie          ////
     {
         public void ScadeStoc()
         {

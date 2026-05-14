@@ -6,18 +6,18 @@ namespace Farmacie_SOLID_UTM.Chains
     // până când cineva are autoritatea să o rezolve.
 
     // Interfața de bază pentru Handler
-    public interface IHandlerAprobare
+    public interface IHandlerAprobare                               ////
     {
         IHandlerAprobare SetNext(IHandlerAprobare handler);
         void GestioneazaCererea(decimal procentDiscount);
     }
 
     // Clasa abstractă ajutătoare (opțional, dar recomandat)
-    public abstract class BaseHandlerAprobare : IHandlerAprobare
+    public abstract class BaseHandlerAprobare : IHandlerAprobare   /////
     {
         private IHandlerAprobare _nextHandler;
 
-        public IHandlerAprobare SetNext(IHandlerAprobare handler)
+        public IHandlerAprobare SetNext(IHandlerAprobare handler) 
         {
             _nextHandler = handler;
             // Returnăm handlerul pasat pentru a permite legarea în lanț: h1.SetNext(h2).SetNext(h3)
@@ -38,7 +38,7 @@ namespace Farmacie_SOLID_UTM.Chains
     }
 
     // Handler 1: Farmacistul (aprobă până la 5%)
-    public class FarmacistHandler : BaseHandlerAprobare
+    public class FarmacistHandler : BaseHandlerAprobare                     ////
     {
         public override void GestioneazaCererea(decimal procentDiscount)
         {
@@ -55,7 +55,7 @@ namespace Farmacie_SOLID_UTM.Chains
     }
 
     // Handler 2: Managerul (aprobă până la 15%)
-    public class ManagerHandler : BaseHandlerAprobare
+    public class ManagerHandler : BaseHandlerAprobare                      ////
     {
         public override void GestioneazaCererea(decimal procentDiscount)
         {
@@ -72,7 +72,7 @@ namespace Farmacie_SOLID_UTM.Chains
     }
 
     // Handler 3: Directorul (aprobă orice peste 15%)
-    public class DirectorHandler : BaseHandlerAprobare
+    public class DirectorHandler : BaseHandlerAprobare                  ////
     {
         public override void GestioneazaCererea(decimal procentDiscount)
         {

@@ -1,17 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Farmacie_SOLID_UTM.Interfaces;
 using Farmacie_SOLID_UTM.Models;
 using Farmacie_SOLID_UTM.Factories;
 using Farmacie_SOLID_UTM.Builders;
-using Farmacie_SOLID_UTM.Director;
 using Farmacie_SOLID_UTM.Services;
 using Farmacie_SOLID_UTM.Strategies;
 using Farmacie_SOLID_UTM.Observers;
@@ -30,374 +25,383 @@ namespace Farmacie_SOLID_UTM
     {
         private readonly IStocare _stocare;
         
-        // Controale noi pentru Pattern-uri
-        private ComboBox cmbTipProdus;
-        private Button btnTrusaAdulti;
+        // --- Componente UI ---
+        private TabControl tabControl;
+        private TabPage tabVanzari;
+        private TabPage tabAprovizionare;
+        private TabPage tabRapoarte;
+        
+        // UI: Vanzari
+        private ComboBox cmbProduseVanzare;
+        private ComboBox cmbStrategieDiscount;
+        private ListBox lstCos;
+        private Button btnAdaugaCos;
+        private Button btnUndoCos;
+        private Button btnFinalizeazaVanzare;
+        private Label lblTotal;
+
+        // UI: Aprovizionare
+        private DataGridView dgvStoc;
+        private Button btnCereAprobareBuget;
         private Button btnTrusaCopii;
-        private Button btnBuilder; // Builder Pattern (Director)
-        private Button btnClone;   // Prototype Pattern
-        private Button btnTest;    // Unit Tests
-        private Button btnLab6;    // Buton Special Laborator 6
-        private Button btnLab7;    // Buton Special Laborator 7
-        private Label lblTipProdus;
+        private Button btnTrusaAdulti;
+        private Label lblStareComanda;
+        private Button btnAvansStareComanda;
+        
+        // UI: Rapoarte
+        private Button btnRaportPdf;
+        private Button btnRaportCsv;
+        private Button btnExportXml;
+
+        // --- Instante Patternuri ---
+        private CosOriginator _cos;
+        private IstoricCosCaretaker _istoric;
+        private CentralaFarmacie _mediator;
+        private DepartamentVanzari _vanzari;
+        private DepartamentDepozit _depozit;
+        private CasaDeMarcat _casaMarcat;
+        private ComandaAprovizionare _comandaCurenta;
+        private decimal _totalCos = 0;
 
         public Form1(IStocare stocare)
         {
             InitializeComponent();
             _stocare = stocare;
             
-            InitializeCustomControls();
+            // Eliminam vechiul UI (designerul vechi plin de butoane "Test")
+            this.Controls.Clear();
+            
+            // Instantiere arhitectura pentru comunicare Mediator
+            _mediator = new CentralaFarmacie();
+            _vanzari = new DepartamentVanzari();
+            _depozit = new DepartamentDepozit();
+            _mediator.SeteazaVanzari(_vanzari);
+            _mediator.SeteazaDepozit(_depozit);
+
+            // Memento + Command pentru Casa de marcat
+            _cos = new CosOriginator();
+            _istoric = new IstoricCosCaretaker(_cos);
+            _casaMarcat = new CasaDeMarcat();
+            
+            // Initializare date stoc fictiv
+            PopuleazaStocInitial();
+
+            // Construire Interfata Generala (Functional)
+            ConstruiesteInterfataVizuala();
         }
 
-        private void InitializeCustomControls()
+        private void PopuleazaStocInitial()
         {
-            // Label pentru ComboBox
-            lblTipProdus = new Label();
-            lblTipProdus.Text = "Tip Produs:";
-            lblTipProdus.Location = new Point(45, 180);
-            lblTipProdus.AutoSize = true;
-            this.Controls.Add(lblTipProdus);
-
-            // ComboBox pentru Factory Method
-            cmbTipProdus = new ComboBox();
-            cmbTipProdus.Location = new Point(127, 177);
-            cmbTipProdus.Items.AddRange(new object[] { "Medicament", "Echipament Medical" });
-            cmbTipProdus.SelectedIndex = 0; // Default Medicament
-            cmbTipProdus.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.Controls.Add(cmbTipProdus);
-
-            // Buton Trusa Adulti (Abstract Factory)
-            btnTrusaAdulti = new Button();
-            btnTrusaAdulti.Text = "Creeaza Trusa Adulti";
-            btnTrusaAdulti.Location = new Point(43, 220);
-            btnTrusaAdulti.Size = new Size(150, 30);
-            btnTrusaAdulti.Click += BtnTrusaAdulti_Click;
-            this.Controls.Add(btnTrusaAdulti);
-
-            // Buton Trusa Copii (Abstract Factory)
-            btnTrusaCopii = new Button();
-            btnTrusaCopii.Text = "Creeaza Trusa Copii";
-            btnTrusaCopii.Location = new Point(200, 220); // Put it next to the other one
-            btnTrusaCopii.Size = new Size(150, 30);
-            btnTrusaCopii.Click += BtnTrusaCopii_Click;
-            btnTrusaCopii.Click += BtnTrusaCopii_Click;
-            this.Controls.Add(btnTrusaCopii);
-
-            // Buton Builder Pattern (Trusa Personalizata)
-            btnBuilder = new Button();
-            btnBuilder.Text = "Trusa Personalizata (Builder)";
-            btnBuilder.Location = new Point(360, 220); 
-            btnBuilder.Size = new Size(180, 30);
-            btnBuilder.Click += BtnBuilder_Click;
-            this.Controls.Add(btnBuilder);
-
-            // Buton Prototype Pattern (Cloneaza Selectia)
-            btnClone = new Button();
-            btnClone.Text = "Cloneaza Produs (Prototype)";
-            btnClone.Location = new Point(550, 220);
-            btnClone.Size = new Size(180, 30);
-            btnClone.Click += BtnClone_Click;
-            this.Controls.Add(btnClone);
-
-            // Buton Testare
-            btnTest = new Button();
-            btnTest.Text = "Ruleaza Teste Unitare";
-            btnTest.Location = new Point(740, 220); // Far right
-            btnTest.Size = new Size(150, 30);
-            btnTest.Click += (s, e) => Farmacie_SOLID_UTM.Tests.UnitTests.RuleazaToate();
-            this.Controls.Add(btnTest);
-
-            // Buton Demonstratie Lab 6 (adaugat pe ecran)
-            btnLab6 = new Button();
-            btnLab6.Text = "Demonstratie Lab 6 (Patterns)";
-            btnLab6.Location = new Point(43, 260); // Asezat mai jos
-            btnLab6.Size = new Size(250, 30);
-            btnLab6.BackColor = Color.LightGreen;
-            btnLab6.Click += BtnLab6_Click;
-            this.Controls.Add(btnLab6);
-
-            // Buton Demonstratie Lab 7
-            btnLab7 = new Button();
-            btnLab7.Text = "Demonstratie Lab 7 (Patterns)";
-            btnLab7.Location = new Point(310, 260); // Langa butonul de Lab 6
-            btnLab7.Size = new Size(250, 30);
-            btnLab7.BackColor = Color.LightSkyBlue;
-            btnLab7.Click += BtnLab7_Click;
-            this.Controls.Add(btnLab7);
+            StocManager.Instance.AdaugaProdus(new Medicament("Nurofen Răceală", 35.5m, "Reckitt Benckiser"));
+            StocManager.Instance.AdaugaProdus(new Medicament("Aspirină Cardio", 15.0m, "Bayer"));
+            StocManager.Instance.AdaugaProdus(new EchipamentMedical("Termometru Digital", 45.0m, "Dispozitiv Masurare"));
+            StocManager.Instance.AdaugaProdus(new BandajElastic("Fașă Elastică 10cm", 12.0m, "Bumbac"));
         }
 
-        private void BtnLab7_Click(object sender, EventArgs e)
+        private void ConstruiesteInterfataVizuala()
         {
-            // PROFESOAREI IMPRIMATI ASTA VISUAL: Aceasta metoda este Clientul (Form1) 
-            // demonstrand rularea celor 5 patternuri din Lab 7!
+            this.Text = "Farmacie Inteligentă - Panou Principal";
+            this.Size = new Size(1000, 650);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.FromArgb(240, 244, 248);
 
-            // --- 1. CHAIN OF RESPONSIBILITY ---
-            // EXPLICATIE: Un lant de aprobare discount trece cererea de la Farmacist la Director pana o aproba cineva.
+            // Header
+            Panel header = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Color.FromArgb(41, 128, 185) };
+            Label title = new Label { Text = "Sistem Gestiune Farmacie", ForeColor = Color.White, Font = new Font("Segoe UI", 16, FontStyle.Bold), AutoSize = true, Location = new Point(20, 15) };
+            header.Controls.Add(title);
+            this.Controls.Add(header);
+
+            tabControl = new TabControl { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 11) };
+            this.Controls.Add(tabControl);
+            tabControl.BringToFront();
+
+            // Tab-urile
+            tabVanzari = new TabPage("🛒 Casă de Marcat (Vânzări)");
+            tabAprovizionare = new TabPage("📦 Depozit & Aprovizionare");
+            tabRapoarte = new TabPage("📊 Rapoarte & Export");
+
+            tabControl.TabPages.Add(tabVanzari);
+            tabControl.TabPages.Add(tabAprovizionare);
+            tabControl.TabPages.Add(tabRapoarte);
+
+            CreareTabVanzari();
+            CreareTabAprovizionare();
+            CreareTabRapoarte();
+            
+            RefreshComboBoxVanzari();
+            RefreshDataGridView();
+        }
+
+        // ==========================================
+        // TAB 1: VANZARI (Foloseste Memento, Command, Strategy, Mediator)
+        // ==========================================
+        private void CreareTabVanzari()
+        {
+            tabVanzari.BackColor = Color.White;
+
+            Label l1 = new Label { Text = "Selectați Produsul:", AutoSize = true, Location = new Point(30, 30) };
+            cmbProduseVanzare = new ComboBox { Location = new Point(30, 60), Size = new Size(250, 30), DropDownStyle = ComboBoxStyle.DropDownList };
+            
+            btnAdaugaCos = new Button { Text = "➕ Adaugă Produs", Location = new Point(300, 58), Size = new Size(150, 35), BackColor = Color.FromArgb(46, 204, 113), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnAdaugaCos.Click += BtnAdaugaCos_Click;
+
+            btnUndoCos = new Button { Text = "⏪ Undo", Location = new Point(470, 58), Size = new Size(100, 35), BackColor = Color.FromArgb(231, 76, 60), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnUndoCos.Click += BtnUndoCos_Click;
+
+            lstCos = new ListBox { Location = new Point(30, 120), Size = new Size(540, 250) };
+
+            Label l2 = new Label { Text = "Strategie Discount:", AutoSize = true, Location = new Point(620, 120) };
+            cmbStrategieDiscount = new ComboBox { Location = new Point(620, 150), Size = new Size(200, 30), DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbStrategieDiscount.Items.AddRange(new string[] { "Fără Discount", "Fidelitate (10%)", "Pensionar (20%)" });
+            cmbStrategieDiscount.SelectedIndex = 0;
+            cmbStrategieDiscount.SelectedIndexChanged += UpdateTotal;
+
+            lblTotal = new Label { Text = "Total: 0.00 MDL", Font = new Font("Segoe UI", 16, FontStyle.Bold), ForeColor = Color.FromArgb(41, 128, 185), AutoSize = true, Location = new Point(620, 220) };
+
+            btnFinalizeazaVanzare = new Button { Text = "💵 Finalizează Bon", Location = new Point(620, 280), Size = new Size(200, 50), BackColor = Color.FromArgb(52, 152, 219), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 12, FontStyle.Bold) };
+            btnFinalizeazaVanzare.Click += BtnFinalizeazaVanzare_Click;
+
+            tabVanzari.Controls.Add(l1);
+            tabVanzari.Controls.Add(cmbProduseVanzare);
+            tabVanzari.Controls.Add(btnAdaugaCos);
+            tabVanzari.Controls.Add(btnUndoCos);
+            tabVanzari.Controls.Add(lstCos);
+            tabVanzari.Controls.Add(l2);
+            tabVanzari.Controls.Add(cmbStrategieDiscount);
+            tabVanzari.Controls.Add(lblTotal);
+            tabVanzari.Controls.Add(btnFinalizeazaVanzare);
+        }
+
+        private void BtnAdaugaCos_Click(object sender, EventArgs e)
+        {
+            if (cmbProduseVanzare.SelectedItem == null) return;
+            string sel = cmbProduseVanzare.SelectedItem.ToString();
+            string numeProdus = sel.Split('-')[0].Trim();
+            decimal pret = decimal.Parse(sel.Split('-')[1].Replace("MDL", "").Trim());
+
+            // MEMENTO PATTERN: Salvam starea curenta INAINTE de a adauga noul produs
+            _istoric.SalveazaStarea(); 
+            
+            // COMMAND PATTERN: Simulam executia unei comenzi
+            var sistemGest = new SistemGestiune();
+            var cmd = new ComandaVanzare(sistemGest, numeProdus, 1);
+            _casaMarcat.SetCommand(cmd);
+            _casaMarcat.ExecuteCommand();
+
+            _cos.AdaugaProdus(numeProdus);
+            _totalCos += pret;
+            
+            UpdateCosUI();
+        }
+
+        private void BtnUndoCos_Click(object sender, EventArgs e)
+        {
+            // MEMENTO PATTERN: Anulam ultima adaugare
+            _istoric.Undo();
+            
+            // Re-calculam totalul (simplificat ptr demonstratie)
+            _totalCos = 0;
+            var produseDinStoc = StocManager.Instance.GetProduse();
+            foreach (var pCos in _cos.AfiseazaContinut().Split('\n'))
+            {
+                if(string.IsNullOrWhiteSpace(pCos)) continue;
+                var match = produseDinStoc.FirstOrDefault(x => pCos.Contains(x.Nume));
+                if(match != null) _totalCos += match.Pret;
+            }
+
+            UpdateCosUI();
+            MessageBox.Show("[Memento Pattern]\nStarea coșului a fost restaurată la pasul anterior!", "Undo Efectuat");
+        }
+
+        private void UpdateCosUI()
+        {
+            lstCos.Items.Clear();
+            var items = _cos.AfiseazaContinut().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in items) lstCos.Items.Add(item);
+            UpdateTotal(null, null);
+        }
+
+        private void UpdateTotal(object sender, EventArgs e)
+        {
+            // STRATEGY PATTERN
+            var calc = new CalculatorPretFinal();
+            if (cmbStrategieDiscount.SelectedIndex == 1) calc.SetStrategie(new DiscountFidelitate());
+            else if (cmbStrategieDiscount.SelectedIndex == 2) calc.SetStrategie(new DiscountPensionar());
+            else calc.SetStrategie(new FaraDiscount());
+
+            decimal final = calc.CalculeazaPretul(_totalCos);
+            lblTotal.Text = $"Total: {final:F2} MDL";
+        }
+
+        private void BtnFinalizeazaVanzare_Click(object sender, EventArgs e)
+        {
+            if (lstCos.Items.Count == 0) return;
+
+            // MEDIATOR PATTERN
+            // DepartamentVanzari informează sistemul (Mediatorul) că s-a vândut ceva
+            // Iar Mediatorul (CentralaFarmacie) se va duce automat in Departamentul Depozit sa faca ajustarile.
+            _vanzari.EfectueazaVanzare();
+
+            MessageBox.Show($"Vânzare finalizată cu succes!\n\n[Mediator Pattern] a asigurat scăderea stocului în depozit (fără ca Vanzarile să comunice direct cu Depozitul).\n[Strategy Pattern] a aplicat discountul.", "Bon Fiscal");
+            
+            _cos = new CosOriginator(); // Golim cosul
+            _istoric = new IstoricCosCaretaker(_cos);
+            _totalCos = 0;
+            UpdateCosUI();
+        }
+
+        // ==========================================
+        // TAB 2: APROVIZIONARE (Foloseste Chain of Resp, State, Factory)
+        // ==========================================
+        private void CreareTabAprovizionare()
+        {
+            tabAprovizionare.BackColor = Color.White;
+
+            dgvStoc = new DataGridView { Location = new Point(30, 30), Size = new Size(500, 350), ReadOnly = true, BackgroundColor = Color.White, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            
+            Label l1 = new Label { Text = "Acțiuni Creare (Abstract Factory):", AutoSize = true, Location = new Point(570, 30), Font = new Font("Segoe UI", 11, FontStyle.Bold) };
+            
+            btnTrusaAdulti = new Button { Text = "Crează Trusă Adulți", Location = new Point(570, 60), Size = new Size(200, 40), BackColor = Color.LightGray, FlatStyle = FlatStyle.Flat };
+            btnTrusaAdulti.Click += (s, e) => { AdaugaTrusa(new TrusaAdultiFactory()); };
+            
+            btnTrusaCopii = new Button { Text = "Crează Trusă Copii", Location = new Point(570, 110), Size = new Size(200, 40), BackColor = Color.LightGray, FlatStyle = FlatStyle.Flat };
+            btnTrusaCopii.Click += (s, e) => { AdaugaTrusa(new TrusaCopiiFactory()); };
+
+            Label l2 = new Label { Text = "Livrări și Aprobări:", AutoSize = true, Location = new Point(570, 180), Font = new Font("Segoe UI", 11, FontStyle.Bold) };
+
+            btnCereAprobareBuget = new Button { Text = "Cere Aprobare Comandă\n(Chain of Responsibility)", Location = new Point(570, 210), Size = new Size(250, 50), BackColor = Color.FromArgb(243, 156, 18), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnCereAprobareBuget.Click += BtnCereAprobareBuget_Click;
+
+            lblStareComanda = new Label { Text = "Stare Comandă Curentă: INEXISTENTĂ", Location = new Point(570, 280), Size = new Size(350, 30), Font = new Font("Segoe UI", 10, FontStyle.Italic) };
+
+            btnAvansStareComanda = new Button { Text = "Procesează Starea Comenzii (State)", Location = new Point(570, 320), Size = new Size(250, 40), BackColor = Color.DarkSlateBlue, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Enabled = false };
+            btnAvansStareComanda.Click += BtnAvansStareComanda_Click;
+
+            tabAprovizionare.Controls.Add(dgvStoc);
+            tabAprovizionare.Controls.Add(l1);
+            tabAprovizionare.Controls.Add(btnTrusaAdulti);
+            tabAprovizionare.Controls.Add(btnTrusaCopii);
+            tabAprovizionare.Controls.Add(l2);
+            tabAprovizionare.Controls.Add(btnCereAprobareBuget);
+            tabAprovizionare.Controls.Add(lblStareComanda);
+            tabAprovizionare.Controls.Add(btnAvansStareComanda);
+        }
+
+        private void AdaugaTrusa(ITrusaFactory factory)
+        {
+            var med = factory.CreareMedicamentDurere();
+            var bandaj = factory.CreareBandaj();
+            StocManager.Instance.AdaugaProdus(med);
+            StocManager.Instance.AdaugaProdus(bandaj);
+            RefreshDataGridView();
+            RefreshComboBoxVanzari();
+            MessageBox.Show("[Abstract Factory]\nTrusa (Medicament + Bandaj) a fost asamblată și adăugată în inventar!", "Succes");
+        }
+
+        private void BtnCereAprobareBuget_Click(object sender, EventArgs e)
+        {
+            // CHAIN OF RESPONSIBILITY PATTERN
             var farmacist = new FarmacistHandler();
             var manager = new ManagerHandler();
             var director = new DirectorHandler();
+            
+            // Setam lantul: Farmacist -> Manager -> Director
             farmacist.SetNext(manager).SetNext(director);
-            farmacist.GestioneazaCererea(12); // Cade in responsabilitatea Managerului!
+            
+            // Cerem o reaprovizionare gigant de 20% discount (doar Directorul poate)
+            farmacist.GestioneazaCererea(20);
 
-            // --- 2. STATE ---
-            // EXPLICATIE: Comanda de aprovizionare isi schimba comportamentul daca ii mutam starea!
-            var comanda = new ComandaAprovizionare(new StareNoua()); // Pleaca Noua
-            comanda.Proceseaza(); // Ajunge In Procesare
-            comanda.Livreaza(); // Ajunge Livrata
+            MessageBox.Show("[Chain of Responsibility]\nCererea ta de reducere bugetară (20%) a fost trecută automat prin lanțul ierarhic.\nFarmacistul nu a putut. Managerul nu a putut. Directorul a aprobat-o!", "Aprobare Reușită");
 
-            // --- 3. MEDIATOR ---
-            // EXPLICATIE: Vanzarile si Depozitul nu se striga direct unul pe altul. Ele vorbesc prin CentralaFarmacie.
-            var centrala = new CentralaFarmacie();
-            var vanzari = new DepartamentVanzari();
-            var depozit = new DepartamentDepozit();
-            centrala.SeteazaVanzari(vanzari);
-            centrala.SeteazaDepozit(depozit);
-            vanzari.EfectueazaVanzare(); // Asta triggereaza automat scaderea in depozit via Mediator!
+            // Initiem crearea comenzii (State)
+            _comandaCurenta = new ComandaAprovizionare(new StareNoua());
+            lblStareComanda.Text = "Stare Comandă Curentă: NOUĂ";
+            btnAvansStareComanda.Enabled = true;
+        }
 
-            // --- 4. TEMPLATE METHOD ---
-            // EXPLICATIE: Raportul de vanzari refoloseste pasii standard (Culegere -> Printare) dar suprascrie doar Formatarea.
-            RaportTemplate raportZilnic = new RaportZilnicVanzari();
-            raportZilnic.GenereazaRaport();
+        private void BtnAvansStareComanda_Click(object sender, EventArgs e)
+        {
+            // STATE PATTERN
+            if (lblStareComanda.Text.Contains("NOUĂ"))
+            {
+                _comandaCurenta.Proceseaza(); // Muta starea din interior
+                lblStareComanda.Text = "Stare Comandă Curentă: ÎN PROCESARE";
+                MessageBox.Show("[State Pattern]\nComanda se comportă acum ca fiind 'În Procesare'.", "Tranziție");
+            }
+            else if (lblStareComanda.Text.Contains("ÎN PROCESARE"))
+            {
+                _comandaCurenta.Livreaza(); // Muta starea
+                lblStareComanda.Text = "Stare Comandă Curentă: LIVRATĂ";
+                btnAvansStareComanda.Enabled = false; // Gata drumul
+                MessageBox.Show("[State Pattern]\nComanda a sosit la farmacie! Stare finală atinsă.", "Tranziție");
+            }
+        }
 
-            // --- 5. VISITOR ---
-            // EXPLICATIE: Vrem un export XML pentru Facturi si Retete fara sa stricam clasele de baza. Visitorul le "viziteaza" pe ambele.
-            var doc1 = new RetetaCompensata();
-            var doc2 = new FacturaFirma();
+        private void RefreshDataGridView()
+        {
+            dgvStoc.DataSource = null;
+            dgvStoc.DataSource = StocManager.Instance.GetProduse();
+        }
+
+        private void RefreshComboBoxVanzari()
+        {
+            cmbProduseVanzare.Items.Clear();
+            foreach (var p in StocManager.Instance.GetProduse())
+            {
+                cmbProduseVanzare.Items.Add($"{p.Nume} - {p.Pret} MDL");
+            }
+            if (cmbProduseVanzare.Items.Count > 0) cmbProduseVanzare.SelectedIndex = 0;
+        }
+
+        // ==========================================
+        // TAB 3: RAPOARTE (Foloseste Template Method, Visitor)
+        // ==========================================
+        private void CreareTabRapoarte()
+        {
+            tabRapoarte.BackColor = Color.White;
+
+            Label l1 = new Label { Text = "1. Generare Documente Contabile (Template Method)", Font = new Font("Segoe UI", 12, FontStyle.Bold), AutoSize = true, Location = new Point(50, 40) };
+            
+            btnRaportPdf = new Button { Text = "Generare Raport PDF (Zilnic)", Location = new Point(50, 80), Size = new Size(250, 45), BackColor = Color.Firebrick, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnRaportPdf.Click += (s, e) => {
+                RaportTemplate raport = new RaportZilnicVanzari();
+                raport.GenereazaRaport();
+                MessageBox.Show("[Template Method]\nS-au executat pașii fixați (Culegere -> Formatare PDF -> Printare) garantând structura!", "Raport Generat");
+            };
+
+            btnRaportCsv = new Button { Text = "Generare Raport CSV (Stoc)", Location = new Point(320, 80), Size = new Size(250, 45), BackColor = Color.SeaGreen, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnRaportCsv.Click += (s, e) => {
+                RaportTemplate raport = new RaportStocCritic();
+                raport.GenereazaRaport();
+                MessageBox.Show("[Template Method]\nS-au executat pașii fixați (Culegere -> Formatare CSV -> Printare) garantând structura!", "Raport Generat");
+            };
+
+            Label l2 = new Label { Text = "2. Integrare cu Sisteme Externe XML (Visitor Pattern)", Font = new Font("Segoe UI", 12, FontStyle.Bold), AutoSize = true, Location = new Point(50, 180) };
+            
+            btnExportXml = new Button { Text = "Extrage XML din Rețete și Facturi", Location = new Point(50, 220), Size = new Size(520, 45), BackColor = Color.MediumOrchid, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
+            btnExportXml.Click += BtnExportXml_Click;
+
+            tabRapoarte.Controls.Add(l1);
+            tabRapoarte.Controls.Add(btnRaportPdf);
+            tabRapoarte.Controls.Add(btnRaportCsv);
+            tabRapoarte.Controls.Add(l2);
+            tabRapoarte.Controls.Add(btnExportXml);
+        }
+
+        private void BtnExportXml_Click(object sender, EventArgs e)
+        {
+            // VISITOR PATTERN
+            var reteta = new RetetaCompensata { NumePacient = "Vasile Popa", Diagnostic = "Gripă" };
+            var factura = new FacturaFirma { NumeFirma = "DepozitFarm SRL", TotalDePlata = 14500m };
+            
             var visitor = new ExportXmlVisitor();
-            doc1.Accept(visitor);
-            doc2.Accept(visitor);
+            
+            // "Vizitatorul" intra curat in clase si le trage datele in afara fara sa le altereze codul
+            reteta.Accept(visitor);
+            factura.Accept(visitor);
 
-            MessageBox.Show(
-                "Demonstratia Laboratorului 7 a simulat totul in cod (vezi Consola pentru loguri detailate):\n\n" +
-                $"1. Chain: O cerere de 12% a ajuns la Manager si a fost aprobata.\n" +
-                $"2. State: Comanda Aprovizionare si-a schimbat perfect stările (Noua->Procesare->Livrata).\n" +
-                $"3. Mediator: Vanzarile au comunicat cu Depozitul curat prin Centrala.\n" +
-                $"4. Template: Raportul s-a formatat folosind skeletonul general.\n" +
-                $"5. Visitor: Am exportat Reteta si Factura in XML fara sa le alteram clasele interne.",
-                "Aplicație - Evaluare Lab 7"
-            );
-        }
-
-        private void BtnLab6_Click(object sender, EventArgs e)
-        {
-
-            // --- 1. STRATEGY PATTERN ---
-            // cum schimbăm algoritmul prețului fără "if"-uri in casă.
-            var calculator = new CalculatorPretFinal();
-            calculator.SetStrategie(new DiscountFidelitate()); // Instantiem o clasa separata
-            decimal pretDupaFidelitate = calculator.CalculeazaPretul(100);
-
-            // --- 2. OBSERVER PATTERN ---
-            // pe "sistem" si "farmacist" sunt adaugati la Produs.
-            var produsAspirina = new ProdusPublisher("Aspirina", 10);
-            produsAspirina.Subscribe(new FarmacistAbonat("Maria"));
-            produsAspirina.Subscribe(new SistemAprovizionare());
-            produsAspirina.ModificaStoc(3); // La 3 trage sirena automat celor abonati sus
-
-            // --- 3. COMMAND PATTERN ---
-            // Am adunat comanda "CasaDeMarcat" într-o capsulă care permite "UndoUltimaComanda" la greseli
-            var sistemGest = new SistemGestiune();
-            var casaMarcat = new CasaDeMarcat();
-            var comanda = new ComandaVanzare(sistemGest, "Nurofen", 2);
-            casaMarcat.SetCommand(comanda);
-            casaMarcat.ExecuteCommand(); // Ex. Un angajat scade stoc 2 lei
-            casaMarcat.UndoUltimaComanda(); // Oups, clientul nu vrea. Returnam complet eroarea.
-
-            // --- 4. MEMENTO PATTERN ---
-            // Am facut "Snapshot"/Fotografie unui cos plin prin clasa ascunsa "CosMemento".
-            var cos = new CosOriginator();
-            cos.AdaugaProdus("Reteta sigura!");
-            var istoric = new IstoricCosCaretaker(cos);
-            istoric.SalveazaStarea(); // Fotografiem acum starea buna (Memento format)
-            cos.AdaugaProdus("Eroare adaugata gresit."); // Pacient razgandit
-            istoric.Undo(); // Restaurare instanta fara batai de cap!
-
-            // --- 5. ITERATOR PATTERN ---
-            // Nu mai ne încurcăm creierul cu logica de raft din DulapMedicamente, IteratorDulap face el
-            var raft = new DulapMedicamente();
-            raft.Adauga("Ser Fiziologic");
-            var iterator = raft.CreateIterator();
-            string elementeParcurse = "";
-            while (iterator.HasMore())
-            {
-                elementeParcurse += iterator.GetNext() + " "; 
-            }
-
-            MessageBox.Show(
-                "Demonstratia Laboratorului 6 a simulat totul in cod:\n\n" +
-                $"1. Strategy: a adus din start aplicatiei din spate {pretDupaFidelitate} MDL cu Discount Fidelitate\n" +
-                $"2. Observer: A ascultat evenimentul modificarii sub 5 cutii Aspirina.\n" +
-                $"3. Command: A salvat capsula de cumparare si apoi a dat Undo repede.\n" +
-                $"4. Memento: Reteta 'Eroare adaugata gresit' a fost blocată la Load State!\n" +
-                $"5. Iterator: Parcurgerea raftului returneaza cutiile: {elementeParcurse}",
-                "Aplicație - Evaluare Patternuri"
-            );
-        }
-
-        private void BtnTrusaAdulti_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Abstract Factory: Trusa Adulti
-                ITrusaFactory factory = new TrusaAdultiFactory();
-                MedicamentDurere med = factory.CreareMedicamentDurere();
-                Bandaj bandaj = factory.CreareBandaj();
-
-                AdaugaInGrid(med);
-                AdaugaInGrid(bandaj);
-
-                MessageBox.Show("Trusa pentru Adulti a fost creata!", "Succes");
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Eroare: " + ex.Message);
-            }
-        }
-
-        private void BtnTrusaCopii_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Abstract Factory: Trusa Copii
-                ITrusaFactory factory = new TrusaCopiiFactory();
-                MedicamentDurere med = factory.CreareMedicamentDurere();
-                Bandaj bandaj = factory.CreareBandaj();
-
-                AdaugaInGrid(med);
-                AdaugaInGrid(bandaj);
-
-                MessageBox.Show("Trusa pentru Copii a fost creata!", "Succes");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Eroare: " + ex.Message);
-            }
-        }
-
-        // Builder Pattern EventHandler (Director Implementation)
-        private void BtnBuilder_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Varianta cu Director (Cerința Lab 3)
-                TrusaBuilder builder = new TrusaBuilder();
-                TrusaDirector director = new TrusaDirector(builder);
-
-                // Construim o trusă standard folosind Directorul
-                TrusaMedicala trusa = director.ConstructTrusaVacanta();
-                
-                MessageBox.Show(trusa.ListeazaContinut(), "Trusa Vacanță (via Director)");
-
-                // Putem demonstra și cealaltă rețetă dacă e nevoie
-                // TrusaMedicala trusaAuto = director.ConstructTrusaAuto();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Eroare Builder: " + ex.Message);
-            }
-        }
-
-        // Prototype Pattern EventHandler
-        private void BtnClone_Click(object sender, EventArgs e)
-        {
-            if (dataGridView1.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Selecteaza un rand pentru a clona!");
-                return;
-            }
-
-            try
-            {
-                // Luam ultimul produs adaugat in StocManager ca demo (sau ar trebui sa mapam grid-ul la obiecte)
-                var produse = StocManager.Instance.GetProduse();
-                if (produse.Count == 0) return;
-
-                Produs original = produse.Last(); 
-                Produs clona = original.Cloneaza(); // Deep/Shallow Copy
-
-                AdaugaInGrid(clona);
-                MessageBox.Show($"Produs clonat cu succes!\nOriginal: {original.Nume}\nClona: {clona.Nume}", "Prototype Pattern");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Eroare Prototype: " + ex.Message);
-            }
-        }
-
-        private void AdaugaInGrid(Produs p)
-        {
-            // Helper pentru adaugare
-            if (p is Medicament m)
-            {
-                dataGridView1.Rows.Add(m.Nume, m.Pret, m.Producator);
-            }
-            else if (p is EchipamentMedical em)
-            {
-                dataGridView1.Rows.Add(em.Nume, em.Pret, em.TipEchipament);
-            }
-            // Singleton Pattern: Adaugam in stocul global
-            StocManager.Instance.AdaugaProdus(p);
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnAdauga_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string nume = txtNume.Text;
-                if(string.IsNullOrWhiteSpace(nume)) throw new Exception("Numele este obligatoriu.");
-                
-                decimal pret = decimal.Parse(txtPret.Text);
-                string extra = txtProducator.Text; // Producator sau Tip Echipament
-
-                // Factory Method
-                ProdusFactory factory;
-                string tipSelectat = cmbTipProdus.SelectedItem.ToString();
-
-                if (tipSelectat == "Medicament")
-                {
-                    factory = new MedicamentFactory();
-                }
-                else
-                {
-                    factory = new EchipamentFactory();
-                }
-
-                // Polimorfism: Nu stim exact ce clasa e, dar stim ca e Produs
-                Produs nou = factory.CreazaProdus(nume, pret, extra);
-
-                // Adaugare in Grid
-                AdaugaInGrid(nou);
-
-                // Curatare UI
-                txtNume.Clear();
-                txtPret.Clear();
-                txtProducator.Clear();
-                txtNume.Focus();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Eroare la adăugare: " + ex.Message, "Atenție!");
-            }
-        }
-
-        private void txtNume_TextChanged(object sender, EventArgs e)
-        {
-
+            string demoXml = "<?xml version=\"1.0\"?>\n<Export>\n  <Reteta Pacient=\"Vasile Popa\" Diagnostic=\"Gripă\"/>\n  <Factura Firma=\"DepozitFarm SRL\" Total=\"14500\"/>\n</Export>";
+            MessageBox.Show($"[Visitor Pattern]\nVizitatorul a extras datele cu succes fără să modifice clasele inițiale.\n\nRezultat generat:\n{demoXml}", "Export XML Finalizat");
         }
     }
 }
