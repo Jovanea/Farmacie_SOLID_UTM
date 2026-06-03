@@ -20,6 +20,11 @@ namespace Farmacie_SOLID_UTM.Mementos
             System.Console.WriteLine("Cos curent: " + string.Join(", ", _state));
         }
 
+        public string AfiseazaContinut()
+        {
+            return string.Join("\n", _state);
+        }
+
         // + save(): Memento
         public IMemento Save()
         {

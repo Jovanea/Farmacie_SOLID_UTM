@@ -95,7 +95,7 @@ namespace Farmacie_SOLID_UTM
             StocManager.Instance.AdaugaProdus(new Medicament("Nurofen Răceală", 35.5m, "Reckitt Benckiser"));
             StocManager.Instance.AdaugaProdus(new Medicament("Aspirină Cardio", 15.0m, "Bayer"));
             StocManager.Instance.AdaugaProdus(new EchipamentMedical("Termometru Digital", 45.0m, "Dispozitiv Masurare"));
-            StocManager.Instance.AdaugaProdus(new BandajElastic("Fașă Elastică 10cm", 12.0m, "Bumbac"));
+            StocManager.Instance.AdaugaProdus(new BandajElastic());
         }
 
         private void ConstruiesteInterfataVizuala()
