@@ -1,61 +1,83 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Farmacie_SOLID_UTM.Visitors
 {
     // Visitor Pattern: Separă un algoritm de structura de obiecte pe care operează.
 
-    // Interfața Visitor
-    public interface IVisitorExport                  ////
+    public interface IVisitorExport
     {
         void Visit(RetetaCompensata reteta);
         void Visit(FacturaFirma factura);
     }
 
-    // Interfața Element
-    public interface IDocumentFarmacie               ////
+    public interface IDocumentFarmacie
     {
         void Accept(IVisitorExport visitor);
     }
 
-    // Element Concret 1
-    public class RetetaCompensata : IDocumentFarmacie      ////// ---->
+    public class RetetaCompensata : IDocumentFarmacie
     {
         public string NumePacient { get; set; } = "Ion Popescu";
-        public string Diagnostic { get; set; } = "Gripa";
+        public string Diagnostic  { get; set; } = "Gripa Sezoniera";
 
         public void Accept(IVisitorExport visitor)
         {
-            // Obligatoriu pentru patternul Visitor (Double Dispatch)
+            visitor.Visit(this);   // Double Dispatch
+        }
+    }
+
+    public class FacturaFirma : IDocumentFarmacie
+    {
+        public string  NumeFirma    { get; set; } = "DepozitFarm SRL";
+        public decimal TotalDePlata { get; set; } = 14500m;
+
+        public void Accept(IVisitorExport visitor)
+        {
             visitor.Visit(this);
         }
     }
 
-    // Element Concret 2
-    public class FacturaFirma : IDocumentFarmacie          ////
+    // Visitor concret: exportă în XML și salvează fișierul
+    public class ExportXmlVisitor : IVisitorExport
     {
-        public string NumeFirma { get; set; } = "Farmacia Centrala SRL";
-        public decimal TotalDePlata { get; set; } = 15000m;
+        private readonly StringBuilder _xml = new StringBuilder();
 
-        public void Accept(IVisitorExport visitor)
+        public ExportXmlVisitor()
         {
-            visitor.Visit(this);
+            _xml.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+            _xml.AppendLine("<ExportCNAS data=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\">");
         }
-    }
 
-    // Concrete Visitor: Extrage datele in XML
-    public class ExportXmlVisitor : IVisitorExport           ///// 
-    {
         public void Visit(RetetaCompensata reteta)
         {
-            Console.WriteLine("[Visitor] Exportă Rețeta în XML:");
-            Console.WriteLine($"    <Reteta><Pacient>{reteta.NumePacient}</Pacient><Diagnostic>{reteta.Diagnostic}</Diagnostic></Reteta>");
+            _xml.AppendLine("  <Reteta>");
+            _xml.AppendLine("    <Pacient>" + reteta.NumePacient + "</Pacient>");
+            _xml.AppendLine("    <Diagnostic>" + reteta.Diagnostic + "</Diagnostic>");
+            _xml.AppendLine("    <DataEliberare>" + DateTime.Now.ToString("dd/MM/yyyy") + "</DataEliberare>");
+            _xml.AppendLine("  </Reteta>");
         }
 
         public void Visit(FacturaFirma factura)
         {
-            Console.WriteLine("[Visitor] Exportă Factura în XML:");
-            Console.WriteLine($"    <Factura><Firma>{factura.NumeFirma}</Firma><Total>{factura.TotalDePlata}</Total></Factura>");
+            _xml.AppendLine("  <Factura>");
+            _xml.AppendLine("    <Firma>" + factura.NumeFirma + "</Firma>");
+            _xml.AppendLine("    <Total currency=\"MDL\">" + factura.TotalDePlata + "</Total>");
+            _xml.AppendLine("    <DataEmitere>" + DateTime.Now.ToString("dd/MM/yyyy") + "</DataEmitere>");
+            _xml.AppendLine("  </Factura>");
+        }
+
+        // Salvează XML-ul pe Desktop și returnează calea + conținutul
+        public (string cale, string xml) Salveaza()
+        {
+            _xml.AppendLine("</ExportCNAS>");
+            string continut = _xml.ToString();
+            string cale = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                "ExportCNAS_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml");
+            File.WriteAllText(cale, continut, Encoding.UTF8);
+            return (cale, continut);
         }
     }
 }

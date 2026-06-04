@@ -15,7 +15,7 @@ namespace Farmacie_SOLID_UTM.Models
         }
 
         // Suprascriem proprietatea Pret pentru a calcula suma tuturor produselor din pachet
-        public new decimal Pret 
+        public override decimal Pret
         {
             get { return _produse.Sum(p => p.Pret); }
         }

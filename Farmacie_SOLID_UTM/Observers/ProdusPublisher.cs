@@ -54,7 +54,7 @@ namespace Farmacie_SOLID_UTM.Observers
             _stocPrincipal = cantitateNoua;
             
             // Logica: Dacă stocul e critic (ex: sub 5 buc), notificam.
-            if (_stocPrincipal < 5)
+            if (_stocPrincipal < 10)
             {
                 NotifySubscribers();
             }

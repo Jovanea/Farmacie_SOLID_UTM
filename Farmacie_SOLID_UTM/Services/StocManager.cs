@@ -53,5 +53,18 @@ namespace Farmacie_SOLID_UTM.Services
         {
             return _produse.Count;
         }
+
+        // Scade cantitatea unui produs dupa vanzare
+        public bool ScadeStoc(string numeProdus, int cantitate = 1)
+        {
+            var produs = _produse.Find(p => p.Nume == numeProdus);
+            if (produs != null && produs.Cantitate >= cantitate)
+            {
+                produs.Cantitate -= cantitate;
+                Console.WriteLine($"[StocManager] Stoc scazut: {produs.Nume} -> {produs.Cantitate} buc ramase");
+                return true;
+            }
+            return false;
+        }
     }
 }
